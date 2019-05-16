@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+   <script>
+      var output;
+
+      function init() {
+         output = document.getElementById("output");
+      }
+
+      window.addEventListener("load", init, false);
+
+      $(document).ready(function(){
+         $("button").click(function(){
+            $.post(document.URL + "shorten",
+            {
+               url: input.value,
+            },
+            function(data,status){
+               if (status != "success") {
+                  writeToScreen(status)
+               } else {
+                  writeToScreen(data)
+               }
+            });
+         });
+      });
+
+      function writeToScreen(message) {
+         var pre = document.createElement("p");
+         pre.style.wordWrap = "break-word";
+         pre.innerHTML = message; output.appendChild(pre);
+      }
+   </script>
+</head>
+<body>
+
+<h2>URL Shortener</h2>
+<input id="input" type="text" value="http://google.com"/>
+<button>Shorten</button>
+<div id = "output"></div>
+
+</body>
+</html>

@@ -88,10 +88,9 @@ run: build
 	@echo -e $(GREEN_COLOR)[run]$(DEFAULT_COLOR)
 	@$(GORUN) -race main.go
 
-docker:
+docker: build
 	@echo -e $(GREEN_COLOR)[DOCKER]$(DEFAULT_COLOR)
-	$(DOCKERBUILD) -t $(IMAGE) $(BIN_PATH)
-	$(DOCKERRUN) --rm -ti $(IMAGE)
+	docker-compose up
 
 swagger-clean:
 	@echo -e $(GREEN_COLOR)[swagger cleanup]$(DEFAULT_COLOR)
