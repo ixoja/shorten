@@ -1,15 +1,14 @@
 package main
 
 import (
-	"github.com/ixoja/shorten/internal/handler"
 	"log"
 
+	"github.com/ixoja/shorten/internal/handler"
 	"github.com/ixoja/shorten/internal/restapi"
 )
 
-var apiConfig restapi.Config
-
 func main() {
+	var apiConfig restapi.Config
 	err := apiConfig.Parse()
 	if err != nil {
 		log.Fatal(err)

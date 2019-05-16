@@ -7,7 +7,6 @@ import (
 )
 
 type Service struct {
-
 }
 
 func (s *Service) Healthy() bool {
