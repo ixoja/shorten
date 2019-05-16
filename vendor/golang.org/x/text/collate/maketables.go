@@ -7,7 +7,7 @@
 // Collation table generator.
 // Data read from the web.
 
-package collate
+package main
 
 import (
 	"archive/zip"
@@ -25,6 +25,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"golang.org/x/text/collate"
 	"golang.org/x/text/collate/build"
 	"golang.org/x/text/internal/colltab"
 	"golang.org/x/text/internal/gen"

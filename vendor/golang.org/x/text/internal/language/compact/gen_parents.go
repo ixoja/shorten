@@ -4,13 +4,14 @@
 
 // +build ignore
 
-package compact
+package main
 
 import (
 	"log"
 
 	"golang.org/x/text/internal/gen"
 	"golang.org/x/text/internal/language"
+	"golang.org/x/text/internal/language/compact"
 	"golang.org/x/text/unicode/cldr"
 )
 

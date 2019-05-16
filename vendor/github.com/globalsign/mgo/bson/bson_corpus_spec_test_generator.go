@@ -1,6 +1,6 @@
 // +build ignore
 
-package bson
+package main
 
 import (
 	"bytes"

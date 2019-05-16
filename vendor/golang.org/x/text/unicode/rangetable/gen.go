@@ -4,7 +4,7 @@
 
 // +build ignore
 
-package rangetable
+package main
 
 import (
 	"bytes"
@@ -20,6 +20,7 @@ import (
 	"golang.org/x/text/internal/gen"
 	"golang.org/x/text/internal/ucd"
 	"golang.org/x/text/language"
+	"golang.org/x/text/unicode/rangetable"
 )
 
 var versionList = flag.String("versions", "",

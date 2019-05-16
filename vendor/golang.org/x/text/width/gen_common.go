@@ -4,7 +4,7 @@
 
 // +build ignore
 
-package width
+package main
 
 // This code is shared between the main code generator and the test code.
 
