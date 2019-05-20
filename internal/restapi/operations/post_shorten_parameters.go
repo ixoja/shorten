@@ -4,6 +4,7 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -79,10 +80,11 @@ func NewPostShortenParams() *PostShortenParams {
 // swagger:parameters PostShorten
 type PostShortenParams struct {
 
-	/*Long URL.
-	  In: query
+	/*
+	  Required: true
+	  In: body
 	*/
-	URL *string
+	URL string
 }
 
 // readRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -91,30 +93,29 @@ func (o *PostShortenParams) readRequest(ctx *gin.Context) error {
 	var res []error
 	formats := strfmt.NewFormats()
 
-	qs := runtime.Values(ctx.Request.URL.Query())
+	if runtime.HasBody(ctx.Request) {
+		var body string
+		if err := ctx.BindJSON(&body); err != nil {
+			if err == io.EOF {
+				res = append(res, errors.Required("url", "body"))
+			} else {
+				res = append(res, errors.NewParseError("url", "body", "", err))
+			}
 
-	qURL, qhkURL, _ := qs.GetOK("url")
-	if err := o.bindURL(qURL, qhkURL, formats); err != nil {
-		res = append(res, err)
+		} else {
+
+			if len(res) == 0 {
+				o.URL = body
+			}
+		}
+
+	} else {
+		res = append(res, errors.Required("url", "body"))
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (o *PostShortenParams) bindURL(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-	if raw == "" { // empty values pass all other validations
-		return nil
-	}
-
-	o.URL = &raw
-
 	return nil
 }
 

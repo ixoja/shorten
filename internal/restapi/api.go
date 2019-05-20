@@ -101,6 +101,7 @@ func initializeRoutes(enableAuth bool, tokenURL string, tracer opentracing.Trace
 	if tracer != nil {
 		routes.PostShorten.RouterGroup.Use(tracing.InitSpan(tracer, "post_shorten"))
 	}
+	routes.PostShorten.RouterGroup.Use(middleware.ContentTypes("text/plain"))
 
 	return routes
 }

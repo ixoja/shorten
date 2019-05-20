@@ -12,7 +12,7 @@ GOTEST    = $(GOCMD) test -race -v -count=1
 GOLINT    = golangci-lint
 
 # Binary output name
-BINARY = shorten
+BINARY = shorten.exe
 
 #
 VENDOR_DIR           = ./vendor
@@ -99,4 +99,5 @@ swagger-clean:
 
 swagger: swagger-clean
 	@echo -e $(GREEN_COLOR)[swagger]$(DEFAULT_COLOR)
-	gin-swagger -A my-api -f swagger.yaml
+	cd (MAKEFILE_PATH)/internal/
+	gin-swagger -A shorten -f ./api/spec.yaml

@@ -38,10 +38,12 @@ func init() {
         "summary": "Create short URL.",
         "parameters": [
           {
-            "type": "string",
-            "description": "Long URL.",
             "name": "url",
-            "in": "query"
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -107,10 +109,12 @@ func init() {
         "summary": "Create short URL.",
         "parameters": [
           {
-            "type": "string",
-            "description": "Long URL.",
             "name": "url",
-            "in": "query"
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {

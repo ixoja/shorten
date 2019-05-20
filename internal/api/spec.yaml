@@ -30,9 +30,10 @@ paths:
       summary: Create short URL.
       parameters:
         - name: url
-          in: query
-          type: string
-          description: Long URL.
+          in: body
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: OK
