@@ -1,5 +1,5 @@
-MAKEFILE_PATH := $(GOPATH)/src/github.com/ixoja/shorten
-BIN_PATH := $(MAKEFILE_PATH)/bin
+MAKEFILE_PATH := $(GOPATH)\src\github.com\ixoja\shorten
+BIN_PATH := $(MAKEFILE_PATH)\bin
 PATH := $(MAKEFILE_PATH):$(PATH)
 
 
@@ -84,9 +84,13 @@ build:
 	@echo -e $(GREEN_COLOR)[build]$(DEFAULT_COLOR)
 	@$(GOBUILD) -v -o $(BIN_PATH)/$(BINARY)
 
-run: build
-	@echo -e $(GREEN_COLOR)[run]$(DEFAULT_COLOR)
-	@$(GORUN) -race main.go
+run webserver: build
+	@echo -e $(GREEN_COLOR)[run web_server]$(DEFAULT_COLOR)
+	$(BIN_PATH)\$(BINARY) -mode "webserver" -html $(MAKEFILE_PATH)\internal\html -port 8080 -api_url "localhost:9000"
+
+run apiserver: build
+	@echo -e $(GREEN_COLOR)[run api_server]$(DEFAULT_COLOR)
+	$(BIN_PATH)\$(BINARY) -mode "apiserver" -api_address ":9000"
 
 docker: build
 	@echo -e $(GREEN_COLOR)[DOCKER]$(DEFAULT_COLOR)

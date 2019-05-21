@@ -1,9 +1,9 @@
 package webserver
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -12,6 +12,7 @@ type Server struct {
 	ApiURL string
 }
 
+//go:generate mockery -case=underscore -name HTTPClient
 type HTTPClient interface {
 	Post(url, key, value string) (*http.Response, error)
 }
@@ -29,7 +30,6 @@ func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("val: ", val)
 	resp, err := s.Client.Post(s.ApiURL, url, val)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -47,7 +47,10 @@ func extractValue(r *http.Request) (string, error) {
 		return "", err
 	}
 
-	val := r.Form[url][0]
-	log.Println(val)
+	vals, ok := r.Form[url]
+	if !ok {
+		return "", errors.New("no url in request")
+	}
+	val := vals[0]
 	return val, nil
 }

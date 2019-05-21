@@ -29,18 +29,25 @@ paths:
     post:
       summary: Create short URL.
       parameters:
-        - name: url
-          in: body
+        - name: body
           required: true
+          in: body
+          description: Node pool to be created.
           schema:
-            type: string
+            $ref: '#/definitions/Body'
       responses:
         200:
           description: OK
           schema:
-            type: object
-            properties:
-              short_url:
-                type: string
+            $ref: '#/definitions/Body'
         500:
           description: Internal error.
+
+definitions:
+  Body:
+    type: object
+    properties:
+      url:
+        type: string
+    required:
+      - url

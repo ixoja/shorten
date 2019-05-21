@@ -38,11 +38,12 @@ func init() {
         "summary": "Create short URL.",
         "parameters": [
           {
-            "name": "url",
+            "description": "Node pool to be created.",
+            "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/Body"
             }
           }
         ],
@@ -50,12 +51,7 @@ func init() {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "properties": {
-                "short_url": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/Body"
             }
           },
           "500": {
@@ -86,6 +82,19 @@ func init() {
         }
       }
     }
+  },
+  "definitions": {
+    "Body": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string"
+        }
+      }
+    }
   }
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
@@ -109,11 +118,12 @@ func init() {
         "summary": "Create short URL.",
         "parameters": [
           {
-            "name": "url",
+            "description": "Node pool to be created.",
+            "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "type": "string"
+              "$ref": "#/definitions/Body"
             }
           }
         ],
@@ -121,12 +131,7 @@ func init() {
           "200": {
             "description": "OK",
             "schema": {
-              "type": "object",
-              "properties": {
-                "short_url": {
-                  "type": "string"
-                }
-              }
+              "$ref": "#/definitions/Body"
             }
           },
           "500": {
@@ -154,6 +159,19 @@ func init() {
           "404": {
             "description": "Shortened URL not found."
           }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Body": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string"
         }
       }
     }

@@ -16,6 +16,8 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	models "github.com/ixoja/shorten/internal/models"
 )
 
 // PostShortenEndpoint executes the core logic of the related
@@ -80,11 +82,11 @@ func NewPostShortenParams() *PostShortenParams {
 // swagger:parameters PostShorten
 type PostShortenParams struct {
 
-	/*
+	/*Node pool to be created.
 	  Required: true
 	  In: body
 	*/
-	URL string
+	Body *models.Body
 }
 
 // readRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -94,23 +96,26 @@ func (o *PostShortenParams) readRequest(ctx *gin.Context) error {
 	formats := strfmt.NewFormats()
 
 	if runtime.HasBody(ctx.Request) {
-		var body string
+		var body models.Body
 		if err := ctx.BindJSON(&body); err != nil {
 			if err == io.EOF {
-				res = append(res, errors.Required("url", "body"))
+				res = append(res, errors.Required("body", "body"))
 			} else {
-				res = append(res, errors.NewParseError("url", "body", "", err))
+				res = append(res, errors.NewParseError("body", "body", "", err))
 			}
 
 		} else {
+			if err := body.Validate(formats); err != nil {
+				res = append(res, err)
+			}
 
 			if len(res) == 0 {
-				o.URL = body
+				o.Body = &body
 			}
 		}
 
 	} else {
-		res = append(res, errors.Required("url", "body"))
+		res = append(res, errors.Required("body", "body"))
 	}
 
 	if len(res) > 0 {
