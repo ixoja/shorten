@@ -22,10 +22,10 @@ import (
 // Routes defines all the routes of the Server service.
 type Routes struct {
 	*gin.Engine
-	GetHash struct {
+	Redirect struct {
 		*gin.RouterGroup
 	}
-	PostShorten struct {
+	Shorten struct {
 		*gin.RouterGroup
 	}
 }
@@ -76,8 +76,8 @@ func healthHandler(healthFunc func() bool) gin.HandlerFunc {
 // business logic for the Server service.
 type Service interface {
 	Healthy() bool
-	GetHash(ctx *gin.Context, params *operations.GetHashParams) *api.Response
-	PostShorten(ctx *gin.Context, params *operations.PostShortenParams) *api.Response
+	Redirect(ctx *gin.Context, params *operations.RedirectParams) *api.Response
+	Shorten(ctx *gin.Context, params *operations.ShortenParams) *api.Response
 }
 
 func ginizePath(path string) string {
@@ -90,18 +90,18 @@ func initializeRoutes(enableAuth bool, tokenURL string, tracer opentracing.Trace
 	engine.Use(gin.Recovery())
 	routes := &Routes{Engine: engine}
 
-	routes.GetHash.RouterGroup = routes.Group("")
-	routes.GetHash.RouterGroup.Use(middleware.LogrusLogger())
+	routes.Redirect.RouterGroup = routes.Group("")
+	routes.Redirect.RouterGroup.Use(middleware.LogrusLogger())
 	if tracer != nil {
-		routes.GetHash.RouterGroup.Use(tracing.InitSpan(tracer, "get_hash"))
+		routes.Redirect.RouterGroup.Use(tracing.InitSpan(tracer, "redirect"))
 	}
 
-	routes.PostShorten.RouterGroup = routes.Group("")
-	routes.PostShorten.RouterGroup.Use(middleware.LogrusLogger())
+	routes.Shorten.RouterGroup = routes.Group("")
+	routes.Shorten.RouterGroup.Use(middleware.LogrusLogger())
 	if tracer != nil {
-		routes.PostShorten.RouterGroup.Use(tracing.InitSpan(tracer, "post_shorten"))
+		routes.Shorten.RouterGroup.Use(tracing.InitSpan(tracer, "shorten"))
 	}
-	routes.PostShorten.RouterGroup.Use(middleware.ContentTypes("text/plain"))
+	routes.Shorten.RouterGroup.Use(middleware.ContentTypes("text/plain"))
 
 	return routes
 }
@@ -183,8 +183,8 @@ func (s *Server) configureRoutes() {
 
 	// setup all service routes after the authenticate middleware has been
 	// initialized.
-	s.Routes.GetHash.GET(ginizePath("/{hash}"), operations.GetHashEndpoint(s.service.GetHash))
-	s.Routes.PostShorten.POST(ginizePath("/shorten"), operations.PostShortenEndpoint(s.service.PostShorten))
+	s.Routes.Redirect.GET(ginizePath("/redirect/{hash}"), operations.RedirectEndpoint(s.service.Redirect))
+	s.Routes.Shorten.POST(ginizePath("/shorten"), operations.ShortenEndpoint(s.service.Shorten))
 }
 
 // Run runs the Server. It will listen on either HTTP or HTTPS depending on the

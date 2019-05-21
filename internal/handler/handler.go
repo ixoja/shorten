@@ -12,9 +12,9 @@ type Service struct {
 func (s *Service) Healthy() bool {
 	return true
 }
-func (s *Service) GetHash(ctx *gin.Context, params *operations.GetHashParams) *api.Response {
+func (s *Service) Redirect(ctx *gin.Context, params *operations.RedirectParams) *api.Response {
 	return &api.Response{}
 }
-func (s *Service) PostShorten(ctx *gin.Context, params *operations.PostShortenParams) *api.Response {
+func (s *Service) Shorten(ctx *gin.Context, params *operations.ShortenParams) *api.Response {
 	return &api.Response{}
 }

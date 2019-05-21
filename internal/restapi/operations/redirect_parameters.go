@@ -4,25 +4,21 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/errors"
-	"github.com/go-openapi/runtime"
 	"github.com/mikkeloscar/gin-swagger/api"
 	"github.com/mikkeloscar/gin-swagger/tracing"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 
 	strfmt "github.com/go-openapi/strfmt"
-
-	models "github.com/ixoja/shorten/internal/models"
 )
 
-// PostShortenEndpoint executes the core logic of the related
+// RedirectEndpoint executes the core logic of the related
 // route endpoint.
-func PostShortenEndpoint(handler func(ctx *gin.Context, params *PostShortenParams) *api.Response) gin.HandlerFunc {
+func RedirectEndpoint(handler func(ctx *gin.Context, params *RedirectParams) *api.Response) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		span := opentracing.SpanFromContext(tracing.Context(ctx))
 
@@ -33,7 +29,7 @@ func PostShortenEndpoint(handler func(ctx *gin.Context, params *PostShortenParam
 		}
 
 		// generate params from request
-		params := NewPostShortenParams()
+		params := NewRedirectParams()
 		err := params.readRequest(ctx)
 		if err != nil {
 			errObj := err.(*errors.CompositeError)
@@ -69,58 +65,51 @@ func PostShortenEndpoint(handler func(ctx *gin.Context, params *PostShortenParam
 	}
 }
 
-// NewPostShortenParams creates a new PostShortenParams object
+// NewRedirectParams creates a new RedirectParams object
 // with the default values initialized.
-func NewPostShortenParams() *PostShortenParams {
+func NewRedirectParams() *RedirectParams {
 	var ()
-	return &PostShortenParams{}
+	return &RedirectParams{}
 }
 
-// PostShortenParams contains all the bound params for the post shorten operation
+// RedirectParams contains all the bound params for the redirect operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters PostShorten
-type PostShortenParams struct {
+// swagger:parameters redirect
+type RedirectParams struct {
 
-	/*Node pool to be created.
+	/*URL ID hash.
 	  Required: true
-	  In: body
+	  In: path
 	*/
-	Body *models.Body
+	Hash string
 }
 
 // readRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls
-func (o *PostShortenParams) readRequest(ctx *gin.Context) error {
+func (o *RedirectParams) readRequest(ctx *gin.Context) error {
 	var res []error
 	formats := strfmt.NewFormats()
 
-	if runtime.HasBody(ctx.Request) {
-		var body models.Body
-		if err := ctx.BindJSON(&body); err != nil {
-			if err == io.EOF {
-				res = append(res, errors.Required("body", "body"))
-			} else {
-				res = append(res, errors.NewParseError("body", "body", "", err))
-			}
-
-		} else {
-			if err := body.Validate(formats); err != nil {
-				res = append(res, err)
-			}
-
-			if len(res) == 0 {
-				o.Body = &body
-			}
-		}
-
-	} else {
-		res = append(res, errors.Required("body", "body"))
+	rHash := []string{ctx.Param("hash")}
+	if err := o.bindHash(rHash, true, formats); err != nil {
+		res = append(res, err)
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (o *RedirectParams) bindHash(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	o.Hash = raw
+
 	return nil
 }
 

@@ -4,21 +4,25 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/errors"
+	"github.com/go-openapi/runtime"
 	"github.com/mikkeloscar/gin-swagger/api"
 	"github.com/mikkeloscar/gin-swagger/tracing"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 
 	strfmt "github.com/go-openapi/strfmt"
+
+	models "github.com/ixoja/shorten/internal/models"
 )
 
-// GetHashEndpoint executes the core logic of the related
+// ShortenEndpoint executes the core logic of the related
 // route endpoint.
-func GetHashEndpoint(handler func(ctx *gin.Context, params *GetHashParams) *api.Response) gin.HandlerFunc {
+func ShortenEndpoint(handler func(ctx *gin.Context, params *ShortenParams) *api.Response) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		span := opentracing.SpanFromContext(tracing.Context(ctx))
 
@@ -29,7 +33,7 @@ func GetHashEndpoint(handler func(ctx *gin.Context, params *GetHashParams) *api.
 		}
 
 		// generate params from request
-		params := NewGetHashParams()
+		params := NewShortenParams()
 		err := params.readRequest(ctx)
 		if err != nil {
 			errObj := err.(*errors.CompositeError)
@@ -65,51 +69,58 @@ func GetHashEndpoint(handler func(ctx *gin.Context, params *GetHashParams) *api.
 	}
 }
 
-// NewGetHashParams creates a new GetHashParams object
+// NewShortenParams creates a new ShortenParams object
 // with the default values initialized.
-func NewGetHashParams() *GetHashParams {
+func NewShortenParams() *ShortenParams {
 	var ()
-	return &GetHashParams{}
+	return &ShortenParams{}
 }
 
-// GetHashParams contains all the bound params for the get hash operation
+// ShortenParams contains all the bound params for the shorten operation
 // typically these are obtained from a http.Request
 //
-// swagger:parameters GetHash
-type GetHashParams struct {
+// swagger:parameters shorten
+type ShortenParams struct {
 
-	/*URL ID hash.
+	/*Node pool to be created.
 	  Required: true
-	  In: path
+	  In: body
 	*/
-	Hash string
+	Body *models.Body
 }
 
 // readRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
 // for simple values it will use straight method calls
-func (o *GetHashParams) readRequest(ctx *gin.Context) error {
+func (o *ShortenParams) readRequest(ctx *gin.Context) error {
 	var res []error
 	formats := strfmt.NewFormats()
 
-	rHash := []string{ctx.Param("hash")}
-	if err := o.bindHash(rHash, true, formats); err != nil {
-		res = append(res, err)
+	if runtime.HasBody(ctx.Request) {
+		var body models.Body
+		if err := ctx.BindJSON(&body); err != nil {
+			if err == io.EOF {
+				res = append(res, errors.Required("body", "body"))
+			} else {
+				res = append(res, errors.NewParseError("body", "body", "", err))
+			}
+
+		} else {
+			if err := body.Validate(formats); err != nil {
+				res = append(res, err)
+			}
+
+			if len(res) == 0 {
+				o.Body = &body
+			}
+		}
+
+	} else {
+		res = append(res, errors.Required("body", "body"))
 	}
 
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (o *GetHashParams) bindHash(rawData []string, hasKey bool, formats strfmt.Registry) error {
-	var raw string
-	if len(rawData) > 0 {
-		raw = rawData[len(rawData)-1]
-	}
-
-	o.Hash = raw
-
 	return nil
 }
 

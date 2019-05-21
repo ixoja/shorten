@@ -10,15 +10,12 @@ produces:
   - text/plain
 
 paths:
-  /{hash}:
+  /redirect/{hash}:
     get:
       summary: Redirect from short URL to long URL.
+      operationId: redirect
       parameters:
-        - in: path
-          name: hash
-          required: true
-          type: string
-          description: URL ID hash.
+        - $ref: '#/parameters/hash'
       responses:
         302:
           description: Redirection to long URL.
@@ -28,6 +25,7 @@ paths:
   /shorten:
     post:
       summary: Create short URL.
+      operationId: shorten
       parameters:
         - name: body
           required: true
@@ -42,6 +40,14 @@ paths:
             $ref: '#/definitions/Body'
         500:
           description: Internal error.
+
+parameters:
+  hash:
+    name: hash
+    in: path
+    type: string
+    description: URL ID hash.
+    required: true
 
 definitions:
   Body:

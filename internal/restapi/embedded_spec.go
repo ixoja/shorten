@@ -33,9 +33,29 @@ func init() {
     "version": "1.0"
   },
   "paths": {
+    "/redirect/{hash}": {
+      "get": {
+        "summary": "Redirect from short URL to long URL.",
+        "operationId": "redirect",
+        "parameters": [
+          {
+            "$ref": "#/parameters/hash"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirection to long URL."
+          },
+          "404": {
+            "description": "Shortened URL not found."
+          }
+        }
+      }
+    },
     "/shorten": {
       "post": {
         "summary": "Create short URL.",
+        "operationId": "shorten",
         "parameters": [
           {
             "description": "Node pool to be created.",
@@ -59,28 +79,6 @@ func init() {
           }
         }
       }
-    },
-    "/{hash}": {
-      "get": {
-        "summary": "Redirect from short URL to long URL.",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "URL ID hash.",
-            "name": "hash",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "302": {
-            "description": "Redirection to long URL."
-          },
-          "404": {
-            "description": "Shortened URL not found."
-          }
-        }
-      }
     }
   },
   "definitions": {
@@ -94,6 +92,15 @@ func init() {
           "type": "string"
         }
       }
+    }
+  },
+  "parameters": {
+    "hash": {
+      "type": "string",
+      "description": "URL ID hash.",
+      "name": "hash",
+      "in": "path",
+      "required": true
     }
   }
 }`))
@@ -113,9 +120,33 @@ func init() {
     "version": "1.0"
   },
   "paths": {
+    "/redirect/{hash}": {
+      "get": {
+        "summary": "Redirect from short URL to long URL.",
+        "operationId": "redirect",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "URL ID hash.",
+            "name": "hash",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirection to long URL."
+          },
+          "404": {
+            "description": "Shortened URL not found."
+          }
+        }
+      }
+    },
     "/shorten": {
       "post": {
         "summary": "Create short URL.",
+        "operationId": "shorten",
         "parameters": [
           {
             "description": "Node pool to be created.",
@@ -139,28 +170,6 @@ func init() {
           }
         }
       }
-    },
-    "/{hash}": {
-      "get": {
-        "summary": "Redirect from short URL to long URL.",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "URL ID hash.",
-            "name": "hash",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "302": {
-            "description": "Redirection to long URL."
-          },
-          "404": {
-            "description": "Shortened URL not found."
-          }
-        }
-      }
     }
   },
   "definitions": {
@@ -174,6 +183,15 @@ func init() {
           "type": "string"
         }
       }
+    }
+  },
+  "parameters": {
+    "hash": {
+      "type": "string",
+      "description": "URL ID hash.",
+      "name": "hash",
+      "in": "path",
+      "required": true
     }
   }
 }`))
