@@ -1,16 +1,18 @@
 package main
 
 import (
-	"github.com/ixoja/shorten/internal/handler"
-	"github.com/ixoja/shorten/internal/restapi"
-	"github.com/ixoja/shorten/internal/webserver"
+	"github.com/ixoja/shorten/internal/grpcapi"
+	"google.golang.org/grpc"
 	"log"
+	"net"
 	"net/http"
+
+	"github.com/ixoja/shorten/internal/webserver"
 )
 
 func main() {
 	const webServer = "webserver"
-	const apiServer = "apiserver"
+	const grpcServer = "grpcserver"
 	config := Config{}
 	config.WithFlags()
 
@@ -22,12 +24,15 @@ func main() {
 		http.HandleFunc("/shorten", ws.Shorten)
 		log.Println("Registering web server on port:", config.port)
 		log.Fatal(http.ListenAndServe(":"+config.port, nil))
-	case apiServer:
-		svc := &handler.Service{}
-		api := restapi.NewServer(svc, &config.apiConfig)
-		err := api.RunWithSigHandler()
+	case grpcServer:
+		lis, err := net.Listen("tcp", config.port)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("failed to listen: %v", err)
+		}
+		s := grpc.NewServer()
+		grpcapi.RegisterShortenServiceServer(s, &server{})
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
 		}
 	}
 }

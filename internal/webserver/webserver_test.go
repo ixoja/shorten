@@ -49,7 +49,7 @@ func TestServer_Shorten(t *testing.T) {
 		client := mocks.HTTPClient{}
 		ws := &Server{ApiURL: apiURL, Client: &client}
 		response := &http.Response{
-			Status: "302 Found",
+			Status:     "302 Found",
 			StatusCode: http.StatusFound,
 			Header:     make(map[string][]string),
 			Body:       ioutil.NopCloser(bytes.NewReader([]byte(""))),

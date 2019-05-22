@@ -1,20 +1,23 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/ixoja/shorten/internal/restapi/operations"
-	"github.com/mikkeloscar/gin-swagger/api"
+	"context"
+	"github.com/ixoja/shorten/internal/grpcapi"
 )
 
 type Service struct {
+	controller Controller
 }
 
-func (s *Service) Healthy() bool {
-	return true
+type Controller interface {
+	Shorten(url string) (string, error)
+	RedirectURL(hash string) (string, error)
 }
-func (s *Service) Redirect(ctx *gin.Context, params *operations.RedirectParams) *api.Response {
-	return &api.Response{}
+
+func (s *Service) Shorten(ctx context.Context, in *grpcapi.ShortenRequest) (*grpcapi.ShortenResponse, error) {
+	return nil, nil
 }
-func (s *Service) Shorten(ctx *gin.Context, params *operations.ShortenParams) *api.Response {
-	return &api.Response{}
+
+func (s *Service) RedirectURL(ctx context.Context, in *grpcapi.RedirectURLRequest) (*grpcapi.RedirectURLResponse, error) {
+	return nil, nil
 }

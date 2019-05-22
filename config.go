@@ -7,12 +7,12 @@ import (
 )
 
 type Config struct {
-	mode string
-	htmlPath string
-	port string
-	apiURL string
+	mode       string
+	htmlPath   string
+	port       string
+	apiURL     string
 	apiAddress string
-	apiConfig restapi.Config
+	apiConfig  restapi.Config
 }
 
 func (c *Config) WithFlags() *Config {
@@ -27,7 +27,6 @@ func (c *Config) WithFlags() *Config {
 		log.Fatal("Failed to parse config", err)
 	}
 	//c.apiConfig.Address = c.apiAddress
-
 
 	return c
 }

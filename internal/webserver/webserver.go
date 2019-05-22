@@ -20,7 +20,7 @@ type HTTPClient interface {
 const url = "url"
 
 func New(client HTTPClient, apiURL string) *Server {
-	return &Server{Client: client, ApiURL:apiURL}
+	return &Server{Client: client, ApiURL: apiURL}
 }
 
 func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {

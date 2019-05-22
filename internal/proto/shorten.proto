@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package grpcapi;
+
+service ShortenService {
+    rpc Shorten (ShortenRequest) returns (ShortenResponse);
+    rpc RedirectURL (RedirectURLRequest) returns (RedirectURLResponse);
+}
+
+message ShortenRequest {
+    string long_url = 1;
+}
+
+message ShortenResponse {
+    string short_url = 1;
+}
+
+message RedirectURLRequest {
+    string hash = 1;
+}
+
+message RedirectURLResponse {
+    string long_url = 1;
+}
