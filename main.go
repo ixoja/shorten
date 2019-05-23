@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/ixoja/shorten/internal/grpcapi"
+	"github.com/ixoja/shorten/internal/service"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -30,7 +31,7 @@ func main() {
 			log.Fatalf("failed to listen: %v", err)
 		}
 		s := grpc.NewServer()
-		grpcapi.RegisterShortenServiceServer(s, &server{})
+		grpcapi.RegisterShortenServiceServer(s, &service.Service{})
 		if err := s.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}
