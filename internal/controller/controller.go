@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/ixoja/shorten/internal/model"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -9,21 +10,16 @@ import (
 )
 
 type Controller struct {
-	cache Storage
-	storage Storage
+	Cache   Storage
+	Storage Storage
 }
 
-type StoredURL struct {
-	ID string
-	LongURL string
-	CreatedAt time.Time
-}
-
+//go:generate mockery -case=underscore -name Storage
 type Storage interface {
-	Save(stored *StoredURL) (*StoredURL, error)
+	Save(stored *model.StoredURL) (*model.StoredURL, error)
 	Delete(id string) error
-	Get(id string) (*StoredURL, bool, error)
-	GetByURL(longURL string) (*StoredURL, bool, error)
+	Get(id string) (*model.StoredURL, bool, error)
+	GetByURL(longURL string) (*model.StoredURL, bool, error)
 	EvictOlder(timestamp time.Time) error
 }
 
@@ -43,14 +39,14 @@ func (c *Controller) Shorten(longURL string) (string, error) {
 	return stored.ID, nil
 }
 
-func (c *Controller) lookupByURL(longURL string) (*StoredURL, bool, error) {
-	if stored, ok, err := c.cache.GetByURL(longURL); err != nil {
+func (c *Controller) lookupByURL(longURL string) (*model.StoredURL, bool, error) {
+	if stored, ok, err := c.Cache.GetByURL(longURL); err != nil {
 		return nil, false, errors.Wrap(err, "failed to get by url from cache")
 	} else if ok {
 		return stored, ok, nil
 	}
 
-	if stored, ok, err := c.cache.GetByURL(longURL); err != nil {
+	if stored, ok, err := c.Storage.GetByURL(longURL); err != nil {
 		return nil, false, errors.Wrap(err, "failed to get by url from storage")
 	} else if ok {
 		return stored, ok, nil
@@ -59,15 +55,15 @@ func (c *Controller) lookupByURL(longURL string) (*StoredURL, bool, error) {
 	return nil, false, nil
 }
 
-func (c *Controller) save(longURL string) (*StoredURL, error) {
-	stored, err := c.storage.Save(&StoredURL{LongURL: longURL})
+func (c *Controller) save(longURL string) (*model.StoredURL, error) {
+	stored, err := c.Storage.Save(&model.StoredURL{LongURL: longURL})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to save into storage")
 	}
 
-	_, err = c.cache.Save(stored)
+	_, err = c.Cache.Save(stored)
 	if err != nil {
-		if err := c.storage.Delete(stored.ID); err != nil {
+		if err := c.Storage.Delete(stored.ID); err != nil {
 			return nil, errors.Wrap(err, "failed to delete from storage")
 		}
 		return nil, errors.Wrap(err, "failed to save into cache")
@@ -88,14 +84,14 @@ func (c *Controller) RedirectURL(hash string) (string, error) {
 	return "", status.Error(codes.NotFound, "has not found")
 }
 
-func (c *Controller) lookupByID(id string) (*StoredURL, bool, error) {
-	if stored, ok, err := c.cache.Get(id); err != nil {
+func (c *Controller) lookupByID(id string) (*model.StoredURL, bool, error) {
+	if stored, ok, err := c.Cache.Get(id); err != nil {
 		return nil, false, errors.Wrap(err, "failed to get by id from cache")
 	} else if ok {
 		return stored, ok, nil
 	}
 
-	if stored, ok, err := c.cache.Get(id); err != nil {
+	if stored, ok, err := c.Cache.Get(id); err != nil {
 		return nil, false, errors.Wrap(err, "failed to get by id from storage")
 	} else if ok {
 		return stored, ok, nil
