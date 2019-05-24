@@ -3,8 +3,6 @@ package controller
 import (
 	"github.com/ixoja/shorten/internal/model"
 	"github.com/pkg/errors"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"strings"
 	"time"
 )
@@ -25,19 +23,19 @@ type Storage interface {
 
 func (c *Controller) Shorten(longURL string) (string, error) {
 	if longURL == "" {
-		return "", status.Error(codes.InvalidArgument, "long url cannot be empty")
+		return "", errors.Wrap(model.ErrEmptyArgument, "long url")
 	}
 
 	longURL = toFullURL(longURL)
 	if stored, ok, err := c.lookupByURL(longURL); err != nil {
-		return "", status.Error(codes.Internal, err.Error())
+		return "", errors.Wrap(model.ErrStorageInternal, err.Error())
 	} else if ok {
 		return stored.ID, nil
 	}
 
 	stored, err := c.save(longURL)
 	if err != nil {
-		return "", status.Error(codes.Internal, err.Error())
+		return "", errors.Wrap(model.ErrStorageInternal, err.Error())
 	}
 
 	return stored.ID, nil
@@ -78,18 +76,18 @@ func (c *Controller) save(longURL string) (*model.StoredURL, error) {
 
 func (c *Controller) RedirectURL(hash string) (string, error) {
 	if hash == "" {
-		return "", status.Error(codes.InvalidArgument, "hash cannot be empty")
+		return "", errors.Wrap(model.ErrEmptyArgument, "hash")
 	}
 
 	stored, ok, err := c.lookupByID(hash)
 	if err != nil {
-		return "", status.Error(codes.Internal, err.Error())
+		return "", errors.Wrap(model.ErrStorageInternal, err.Error())
 	}
 	if ok {
 		return stored.LongURL, nil
 	}
 
-	return "", status.Error(codes.NotFound, "has not found")
+	return "", errors.Wrap(model.ErrNotFound, "hashZ")
 }
 
 func (c *Controller) lookupByID(id string) (*model.StoredURL, bool, error) {

@@ -12,7 +12,7 @@ message ShortenRequest {
 }
 
 message ShortenResponse {
-    string short_url = 1;
+    string hash = 1;
 }
 
 message RedirectURLRequest {

@@ -95,13 +95,3 @@ run apiserver: build
 docker: build
 	@echo -e $(GREEN_COLOR)[DOCKER]$(DEFAULT_COLOR)
 	docker-compose up
-
-swagger-clean:
-	@echo -e $(GREEN_COLOR)[swagger cleanup]$(DEFAULT_COLOR)
-	rd /s /q $(MAKEFILE_PATH)\internal\models
-	rd /s /q $(MAKEFILE_PATH)\internal\restapi
-
-swagger: swagger-clean
-	@echo -e $(GREEN_COLOR)[swagger]$(DEFAULT_COLOR)
-	cd (MAKEFILE_PATH)\internal\
-	gin-swagger -A shorten -f .\api\spec.yaml

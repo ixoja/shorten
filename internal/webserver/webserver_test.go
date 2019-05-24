@@ -3,6 +3,8 @@ package webserver
 import (
 	"bytes"
 	"errors"
+	"fmt"
+	"github.com/icrowley/fake"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -26,10 +28,10 @@ func TestServer_Shorten(t *testing.T) {
 	})
 
 	t.Run("500 Internal Server Error", func(t *testing.T) {
-		apiURL := "short.en/"
-		client := mocks.HTTPClient{}
-		ws := &Server{ApiURL: apiURL, Client: &client}
-		client.On("Post", apiURL, url, "http://google.com").
+		myURL := fake.DomainName()
+		client := mocks.ShortenServiceClient{}
+		ws := &Server{MyURL: myURL, Client: &client}
+		client.On("Post", myURL, url, "http://google.com").
 			Return(nil, errors.New("some err"))
 		req := httptest.NewRequest("POST",
 			"http://example.com/foo",
@@ -45,16 +47,16 @@ func TestServer_Shorten(t *testing.T) {
 	})
 
 	t.Run("302 Found success", func(t *testing.T) {
-		apiURL := "short.en/"
-		client := mocks.HTTPClient{}
-		ws := &Server{ApiURL: apiURL, Client: &client}
+		myURL := "short.en/"
+		client := mocks.ShortenServiceClient{}
+		ws := &Server{MyURL: myURL, Client: &client}
 		response := &http.Response{
 			Status:     "302 Found",
 			StatusCode: http.StatusFound,
 			Header:     make(map[string][]string),
 			Body:       ioutil.NopCloser(bytes.NewReader([]byte(""))),
 		}
-		client.On("Post", apiURL, url, "http://google.com").Return(response, nil)
+		client.On("Post", myURL, url, "http://google.com").Return(response, nil)
 		req := httptest.NewRequest("POST",
 			"http://example.com/foo",
 			strings.NewReader(`url=http%3A%2F%2Fgoogle.com`))
@@ -67,4 +69,39 @@ func TestServer_Shorten(t *testing.T) {
 		assert.Equal(t, response.StatusCode, res.StatusCode)
 		client.AssertExpectations(t)
 	})
+}
+
+func Test_extractValue(t *testing.T) {
+	url := fake.DomainName()
+	for name, tc := range map[string]struct {
+		req *http.Request
+		res string
+		err error
+	}{
+		"success": {
+			req: httptest.NewRequest("POST",
+				"http://example.com/foo", strings.NewReader(fmt.Sprintf(`url=%s`, url))),
+			res: url,
+			err: nil,
+		},
+		"empty url error": {
+			req: httptest.NewRequest("POST",
+				"http://example.com/foo", strings.NewReader(`url=`)),
+			res: "",
+			err: errNoURL,
+		},
+		"no url parameter error": {
+			req: httptest.NewRequest("POST",
+				"http://example.com/foo", strings.NewReader(``)),
+			res: "",
+			err: errNoURL,
+		},
+	}{
+		t.Run(name, func(t *testing.T) {
+			tc.req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+			res, err := extractValue(tc.req, url)
+			assert.Equal(t, tc.res, res)
+			assert.Equal(t, tc.err, err)
+		})
+	}
 }

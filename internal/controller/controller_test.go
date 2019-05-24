@@ -11,8 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func TestController_Shorten(t *testing.T) {
@@ -20,7 +18,7 @@ func TestController_Shorten(t *testing.T) {
 		t.Run("empty url", func(t *testing.T) {
 			c := Controller{}
 			_, err := c.Shorten("")
-			assertCodes(t, codes.InvalidArgument, err)
+			assert.Equal(t, model.ErrEmptyArgument, errors.Cause(err))
 		})
 
 		t.Run("get from cache", func(t *testing.T) {
@@ -32,7 +30,7 @@ func TestController_Shorten(t *testing.T) {
 			cache.On("GetByURL", fullURL).Return(nil, false, retErr)
 
 			_, err := c.Shorten(longURL)
-			assertCodes(t, codes.Internal, err)
+			assert.Equal(t, model.ErrStorageInternal, errors.Cause(err))
 			cache.AssertExpectations(t)
 		})
 
@@ -47,7 +45,7 @@ func TestController_Shorten(t *testing.T) {
 			storage.On("GetByURL", fullURL).Return(nil, false, retErr)
 
 			_, err := c.Shorten(longURL)
-			assertCodes(t, codes.Internal, err)
+			assert.Equal(t, model.ErrStorageInternal, errors.Cause(err))
 			mock.AssertExpectationsForObjects(t, &cache, &storage)
 		})
 
@@ -63,7 +61,7 @@ func TestController_Shorten(t *testing.T) {
 			storage.On("Save", &model.StoredURL{LongURL: fullURL}).Return(nil, retErr)
 
 			_, err := c.Shorten(longURL)
-			assertCodes(t, codes.Internal, err)
+			assert.Equal(t, model.ErrStorageInternal, errors.Cause(err))
 			mock.AssertExpectationsForObjects(t, &cache, &storage)
 		})
 
@@ -83,7 +81,7 @@ func TestController_Shorten(t *testing.T) {
 			storage.On("Delete", hash).Return(nil)
 
 			_, err := c.Shorten(longURL)
-			assertCodes(t, codes.Internal, err)
+			assert.Equal(t, model.ErrStorageInternal, errors.Cause(err))
 			mock.AssertExpectationsForObjects(t, &cache, &storage)
 		})
 
@@ -104,7 +102,7 @@ func TestController_Shorten(t *testing.T) {
 			storage.On("Delete", hash).Return(storageErr)
 
 			_, err := c.Shorten(longURL)
-			assertCodes(t, codes.Internal, err)
+			assert.Equal(t, model.ErrStorageInternal, errors.Cause(err))
 			mock.AssertExpectationsForObjects(t, &cache, &storage)
 		})
 	})
@@ -165,7 +163,7 @@ func TestController_RedirectURL(t *testing.T) {
 		t.Run("empty hash", func(t *testing.T) {
 			c := Controller{}
 			_, err := c.RedirectURL("")
-			assertCodes(t, codes.InvalidArgument, err)
+			assert.Equal(t, model.ErrEmptyArgument, errors.Cause(err))
 		})
 
 		t.Run("get from cache", func(t *testing.T) {
@@ -176,7 +174,7 @@ func TestController_RedirectURL(t *testing.T) {
 			cache.On("Get", hash).Return(nil, false, retErr)
 
 			_, err := c.RedirectURL(hash)
-			assertCodes(t, codes.Internal, err)
+			assert.Equal(t, model.ErrStorageInternal, errors.Cause(err))
 			cache.AssertExpectations(t)
 		})
 
@@ -190,7 +188,7 @@ func TestController_RedirectURL(t *testing.T) {
 			storage.On("Get", hash).Return(nil, false, retErr)
 
 			_, err := c.RedirectURL(hash)
-			assertCodes(t, codes.Internal, err)
+			assert.Equal(t, model.ErrStorageInternal, errors.Cause(err))
 			mock.AssertExpectationsForObjects(t, &cache, &storage)
 		})
 
@@ -203,7 +201,7 @@ func TestController_RedirectURL(t *testing.T) {
 			storage.On("Get", hash).Return(nil, false, nil)
 
 			_, err := c.RedirectURL(hash)
-			assertCodes(t, codes.NotFound, err)
+			assert.Equal(t, model.ErrNotFound, errors.Cause(err))
 			mock.AssertExpectationsForObjects(t, &cache, &storage)
 		})
 	})
@@ -239,11 +237,6 @@ func TestController_RedirectURL(t *testing.T) {
 			mock.AssertExpectationsForObjects(t, &cache, &storage)
 		})
 	})
-}
-
-func assertCodes(t *testing.T, code codes.Code, err error) {
-	s, _ := status.FromError(err)
-	assert.Equal(t, code, s.Code())
 }
 
 func Test_toFullURL(t *testing.T) {

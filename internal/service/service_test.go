@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
-	"github.com/pkg/errors"
+	"github.com/ixoja/shorten/internal/model"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"testing"
 
 	"github.com/icrowley/fake"
@@ -13,45 +15,75 @@ import (
 )
 
 func TestService_Shorten(t *testing.T) {
-	t.Run("error", func(t *testing.T) {
-		c := mocks.Controller{}
-		s := Service{controller: &c}
-		retErr := errors.New("some error")
-		longURL := fake.DomainName()
+	for name, tc := range map[string]struct {
+		have error
+		want codes.Code
+	}{
+		"error internal": {
+			have: model.ErrStorageInternal,
+			want: codes.Internal,
+		},
+		"error empty argument": {
+			have: model.ErrEmptyArgument,
+			want: codes.InvalidArgument,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			c := mocks.Controller{}
+			s := Service{controller: &c}
+			longURL := fake.DomainName()
 
-		c.On("Shorten", longURL).Return("", retErr)
-		_, err := s.Shorten(context.Background(), &grpcapi.ShortenRequest{LongUrl: longURL})
-		assert.Equal(t, retErr, errors.Cause(err))
-		c.AssertExpectations(t)
-	})
+			c.On("Shorten", longURL).Return("", tc.have)
+			_, err := s.Shorten(context.Background(), &grpcapi.ShortenRequest{LongUrl: longURL})
+			assertCodes(t, tc.want, err)
+			c.AssertExpectations(t)
+		})
+	}
 
 	t.Run("success", func(t *testing.T) {
 		c := mocks.Controller{}
 		s := Service{controller: &c}
 		longURL := fake.DomainName()
-		shortURL := fake.CharactersN(5)
+		hash := fake.CharactersN(5)
 
-		c.On("Shorten", longURL).Return(shortURL, nil)
+		c.On("Shorten", longURL).Return(hash, nil)
 		res, err := s.Shorten(context.Background(), &grpcapi.ShortenRequest{LongUrl: longURL})
 		require.NoError(t, err)
-		assert.Equal(t, &grpcapi.ShortenResponse{ShortUrl: shortURL}, res)
+		assert.Equal(t, &grpcapi.ShortenResponse{Hash: hash}, res)
 		c.AssertExpectations(t)
 	})
 
 }
 
 func TestService_RedirectURL(t *testing.T) {
-	t.Run("error", func(t *testing.T) {
-		c := mocks.Controller{}
-		s := Service{controller: &c}
-		hash := fake.CharactersN(5)
-		retErr := errors.New("some error")
+	for name, tc := range map[string]struct {
+		have error
+		want codes.Code
+	}{
+		"error not found": {
+			have: model.ErrNotFound,
+			want: codes.NotFound,
+		},
+		"error internal": {
+			have: model.ErrStorageInternal,
+			want: codes.Internal,
+		},
+		"error empty argument": {
+			have: model.ErrEmptyArgument,
+			want: codes.InvalidArgument,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			c := mocks.Controller{}
+			s := Service{controller: &c}
+			hash := fake.CharactersN(5)
 
-		c.On("RedirectURL", hash).Return("", retErr)
-		_, err := s.RedirectURL(context.Background(), &grpcapi.RedirectURLRequest{Hash: hash})
-		assert.Equal(t, retErr, errors.Cause(err))
-		c.AssertExpectations(t)
-	})
+			c.On("RedirectURL", hash).Return("", tc.have)
+			_, err := s.RedirectURL(context.Background(), &grpcapi.RedirectURLRequest{Hash: hash})
+			assertCodes(t, tc.want, err)
+			c.AssertExpectations(t)
+		})
+	}
 
 	t.Run("success", func(t *testing.T) {
 		c := mocks.Controller{}
@@ -65,4 +97,9 @@ func TestService_RedirectURL(t *testing.T) {
 		assert.Equal(t, &grpcapi.RedirectURLResponse{LongUrl: longURL}, res)
 		c.AssertExpectations(t)
 	})
+}
+
+func assertCodes(t *testing.T, code codes.Code, err error) {
+	s, _ := status.FromError(err)
+	assert.Equal(t, code, s.Code())
 }

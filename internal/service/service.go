@@ -3,7 +3,10 @@ package service
 import (
 	"context"
 	"github.com/ixoja/shorten/internal/grpcapi"
+	"github.com/ixoja/shorten/internal/model"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Service struct {
@@ -17,19 +20,25 @@ type Controller interface {
 }
 
 func (s *Service) Shorten(ctx context.Context, r *grpcapi.ShortenRequest) (*grpcapi.ShortenResponse, error) {
-	shortURL, err := s.controller.Shorten(r.LongUrl)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to shorten url")
+	switch hash, err := s.controller.Shorten(r.LongUrl); errors.Cause(err) {
+	case nil:
+		return &grpcapi.ShortenResponse{Hash: hash}, nil
+	case model.ErrEmptyArgument:
+		return &grpcapi.ShortenResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	default:
+		return &grpcapi.ShortenResponse{}, status.Error(codes.Internal, err.Error())
 	}
-
-	return &grpcapi.ShortenResponse{ShortUrl: shortURL}, nil
 }
 
 func (s *Service) RedirectURL(ctx context.Context, r *grpcapi.RedirectURLRequest) (*grpcapi.RedirectURLResponse, error) {
-	url, err := s.controller.RedirectURL(r.Hash)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get long url")
+	switch url, err := s.controller.RedirectURL(r.Hash); errors.Cause(err) {
+	case nil:
+		return &grpcapi.RedirectURLResponse{LongUrl: url}, nil
+	case model.ErrEmptyArgument:
+		return &grpcapi.RedirectURLResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	case model.ErrNotFound:
+		return &grpcapi.RedirectURLResponse{}, status.Error(codes.NotFound, err.Error())
+	default:
+		return &grpcapi.RedirectURLResponse{}, status.Error(codes.Internal, err.Error())
 	}
-
-	return &grpcapi.RedirectURLResponse{LongUrl: url}, nil
 }
