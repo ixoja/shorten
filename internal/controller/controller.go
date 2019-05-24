@@ -24,6 +24,10 @@ type Storage interface {
 }
 
 func (c *Controller) Shorten(longURL string) (string, error) {
+	if longURL == "" {
+		return "", status.Error(codes.InvalidArgument, "long url cannot be empty")
+	}
+
 	longURL = toFullURL(longURL)
 	if stored, ok, err := c.lookupByURL(longURL); err != nil {
 		return "", status.Error(codes.Internal, err.Error())
@@ -73,12 +77,16 @@ func (c *Controller) save(longURL string) (*model.StoredURL, error) {
 }
 
 func (c *Controller) RedirectURL(hash string) (string, error) {
+	if hash == "" {
+		return "", status.Error(codes.InvalidArgument, "hash cannot be empty")
+	}
+
 	stored, ok, err := c.lookupByID(hash)
 	if err != nil {
 		return "", status.Error(codes.Internal, err.Error())
 	}
 	if ok {
-		return stored.ID, nil
+		return stored.LongURL, nil
 	}
 
 	return "", status.Error(codes.NotFound, "has not found")
@@ -91,7 +99,7 @@ func (c *Controller) lookupByID(id string) (*model.StoredURL, bool, error) {
 		return stored, ok, nil
 	}
 
-	if stored, ok, err := c.Cache.Get(id); err != nil {
+	if stored, ok, err := c.Storage.Get(id); err != nil {
 		return nil, false, errors.Wrap(err, "failed to get by id from storage")
 	} else if ok {
 		return stored, ok, nil
@@ -101,14 +109,14 @@ func (c *Controller) lookupByID(id string) (*model.StoredURL, bool, error) {
 }
 
 const (
-	http = "http://"
+	http  = "http://"
 	https = "https://"
-	ftp = "ftp://"
+	ftp   = "ftp://"
 )
 
 func toFullURL(s string) string {
-	if !strings.HasPrefix(s, http) ||
-		!strings.HasPrefix(s, https) ||
+	if !strings.HasPrefix(s, http) &&
+		!strings.HasPrefix(s, https) &&
 		!strings.HasPrefix(s, ftp) {
 		return http + s
 	}

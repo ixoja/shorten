@@ -48,7 +48,7 @@ func TestService_RedirectURL(t *testing.T) {
 		retErr := errors.New("some error")
 
 		c.On("RedirectURL", hash).Return("", retErr)
-		_, err := s.RedirectURL(context.Background(), &grpcapi.RedirectURLRequest{Hash:hash})
+		_, err := s.RedirectURL(context.Background(), &grpcapi.RedirectURLRequest{Hash: hash})
 		assert.Equal(t, retErr, errors.Cause(err))
 		c.AssertExpectations(t)
 	})
@@ -60,7 +60,7 @@ func TestService_RedirectURL(t *testing.T) {
 		longURL := fake.DomainName()
 
 		c.On("RedirectURL", hash).Return(longURL, nil)
-		res, err := s.RedirectURL(context.Background(), &grpcapi.RedirectURLRequest{Hash:hash})
+		res, err := s.RedirectURL(context.Background(), &grpcapi.RedirectURLRequest{Hash: hash})
 		require.NoError(t, err)
 		assert.Equal(t, &grpcapi.RedirectURLResponse{LongUrl: longURL}, res)
 		c.AssertExpectations(t)

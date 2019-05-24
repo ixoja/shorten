@@ -7,4 +7,3 @@ type StoredURL struct {
 	LongURL   string
 	CreatedAt time.Time
 }
-
