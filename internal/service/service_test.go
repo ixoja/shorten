@@ -30,7 +30,7 @@ func TestService_Shorten(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			c := mocks.Controller{}
-			s := Service{controller: &c}
+			s := Service{Controller: &c}
 			longURL := fake.DomainName()
 
 			c.On("Shorten", longURL).Return("", tc.have)
@@ -42,7 +42,7 @@ func TestService_Shorten(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		c := mocks.Controller{}
-		s := Service{controller: &c}
+		s := Service{Controller: &c}
 		longURL := fake.DomainName()
 		hash := fake.CharactersN(5)
 
@@ -75,7 +75,7 @@ func TestService_RedirectURL(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			c := mocks.Controller{}
-			s := Service{controller: &c}
+			s := Service{Controller: &c}
 			hash := fake.CharactersN(5)
 
 			c.On("RedirectURL", hash).Return("", tc.have)
@@ -87,7 +87,7 @@ func TestService_RedirectURL(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		c := mocks.Controller{}
-		s := Service{controller: &c}
+		s := Service{Controller: &c}
 		hash := fake.CharactersN(5)
 		longURL := fake.DomainName()
 

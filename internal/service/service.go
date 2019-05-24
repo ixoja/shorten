@@ -10,7 +10,11 @@ import (
 )
 
 type Service struct {
-	controller Controller
+	Controller Controller
+}
+
+func New(controller Controller) *Service {
+	return &Service{Controller: controller}
 }
 
 //go:generate mockery -case=underscore -name Controller
@@ -20,7 +24,7 @@ type Controller interface {
 }
 
 func (s *Service) Shorten(ctx context.Context, r *grpcapi.ShortenRequest) (*grpcapi.ShortenResponse, error) {
-	switch hash, err := s.controller.Shorten(r.LongUrl); errors.Cause(err) {
+	switch hash, err := s.Controller.Shorten(r.LongUrl); errors.Cause(err) {
 	case nil:
 		return &grpcapi.ShortenResponse{Hash: hash}, nil
 	case model.ErrEmptyArgument:
@@ -31,7 +35,7 @@ func (s *Service) Shorten(ctx context.Context, r *grpcapi.ShortenRequest) (*grpc
 }
 
 func (s *Service) RedirectURL(ctx context.Context, r *grpcapi.RedirectURLRequest) (*grpcapi.RedirectURLResponse, error) {
-	switch url, err := s.controller.RedirectURL(r.Hash); errors.Cause(err) {
+	switch url, err := s.Controller.RedirectURL(r.Hash); errors.Cause(err) {
 	case nil:
 		return &grpcapi.RedirectURLResponse{LongUrl: url}, nil
 	case model.ErrEmptyArgument:

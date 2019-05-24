@@ -12,6 +12,10 @@ type Controller struct {
 	Storage Storage
 }
 
+func New(cache, storage Storage) *Controller {
+	return &Controller{Cache:cache, Storage: storage}
+}
+
 //go:generate mockery -case=underscore -name Storage
 type Storage interface {
 	Save(stored *model.StoredURL) (*model.StoredURL, error)

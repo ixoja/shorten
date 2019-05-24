@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/ixoja/shorten/internal/model"
@@ -8,6 +9,11 @@ import (
 )
 
 type SQLite struct {
+	Database sql.DB
+}
+
+func New(db sql.DB) *SQLite {
+	return &SQLite{Database:db}
 }
 
 func (s *SQLite) Save(stored *model.StoredURL) (*model.StoredURL, error) {
