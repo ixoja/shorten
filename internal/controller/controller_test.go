@@ -121,15 +121,35 @@ func TestController_Shorten(t *testing.T) {
 			cache.AssertExpectations(t)
 		})
 
-		t.Run("found in storage", func(t *testing.T) {
+		t.Run("found in storage saved to cache", func(t *testing.T) {
 			cache := mocks.Storage{}
 			storage := mocks.Storage{}
 			c := Controller{Cache: &cache, Storage: &storage}
 			longURL := fake.DomainName()
 			fullURL := toFullURL(longURL)
 			hash := fake.CharactersN(5)
+			stored := &model.StoredURL{ID: hash}
 			cache.On("GetByURL", fullURL).Return(nil, false, nil)
-			storage.On("GetByURL", fullURL).Return(&model.StoredURL{ID: hash}, true, nil)
+			storage.On("GetByURL", fullURL).Return(stored, true, nil)
+			cache.On("Save", stored).Return(stored, nil)
+
+			res, err := c.Shorten(longURL)
+			require.NoError(t, err)
+			assert.Equal(t, hash, res)
+			mock.AssertExpectationsForObjects(t, &cache, &storage)
+		})
+
+		t.Run("found in storage failed to saved to cache", func(t *testing.T) {
+			cache := mocks.Storage{}
+			storage := mocks.Storage{}
+			c := Controller{Cache: &cache, Storage: &storage}
+			longURL := fake.DomainName()
+			fullURL := toFullURL(longURL)
+			hash := fake.CharactersN(5)
+			stored := &model.StoredURL{ID: hash}
+			cache.On("GetByURL", fullURL).Return(nil, false, nil)
+			storage.On("GetByURL", fullURL).Return(stored, true, nil)
+			cache.On("Save", stored).Return(nil, errors.New("cache error"))
 
 			res, err := c.Shorten(longURL)
 			require.NoError(t, err)
@@ -221,15 +241,35 @@ func TestController_RedirectURL(t *testing.T) {
 			cache.AssertExpectations(t)
 		})
 
-		t.Run("found in storage", func(t *testing.T) {
+		t.Run("found in storage saved to cache", func(t *testing.T) {
 			cache := mocks.Storage{}
 			storage := mocks.Storage{}
 			c := Controller{Cache: &cache, Storage: &storage}
 			longURL := fake.DomainName()
 			fullURL := toFullURL(longURL)
 			hash := fake.CharactersN(5)
+			stored := &model.StoredURL{ID: hash, LongURL: fullURL}
 			cache.On("Get", hash).Return(nil, false, nil)
-			storage.On("Get", hash).Return(&model.StoredURL{ID: hash, LongURL: fullURL}, true, nil)
+			storage.On("Get", hash).Return(stored, true, nil)
+			cache.On("Save", stored).Return(stored, nil)
+
+			res, err := c.RedirectURL(hash)
+			require.NoError(t, err)
+			assert.Equal(t, fullURL, res)
+			mock.AssertExpectationsForObjects(t, &cache, &storage)
+		})
+
+		t.Run("found in storage failed to save to cache", func(t *testing.T) {
+			cache := mocks.Storage{}
+			storage := mocks.Storage{}
+			c := Controller{Cache: &cache, Storage: &storage}
+			longURL := fake.DomainName()
+			fullURL := toFullURL(longURL)
+			hash := fake.CharactersN(5)
+			stored := &model.StoredURL{ID: hash, LongURL: fullURL}
+			cache.On("Get", hash).Return(nil, false, nil)
+			storage.On("Get", hash).Return(stored, true, nil)
+			cache.On("Save", stored).Return(nil, errors.New("cache error"))
 
 			res, err := c.RedirectURL(hash)
 			require.NoError(t, err)

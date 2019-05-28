@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/ixoja/shorten/internal/model"
 	"github.com/pkg/errors"
+	"log"
 	"strings"
 	"time"
 )
@@ -55,6 +56,9 @@ func (c *Controller) lookupByURL(longURL string) (*model.StoredURL, bool, error)
 	if stored, ok, err := c.Storage.GetByURL(longURL); err != nil {
 		return nil, false, errors.Wrap(err, "failed to get by url from storage")
 	} else if ok {
+		if _, err := c.Cache.Save(stored); err != nil {
+			log.Println("failed to save to cache, skipping", err.Error())
+		}
 		return stored, ok, nil
 	}
 
@@ -104,6 +108,9 @@ func (c *Controller) lookupByID(id string) (*model.StoredURL, bool, error) {
 	if stored, ok, err := c.Storage.Get(id); err != nil {
 		return nil, false, errors.Wrap(err, "failed to get by id from storage")
 	} else if ok {
+		if _, err := c.Cache.Save(stored); err != nil {
+			log.Println("failed to save to cache, skipping", err.Error())
+		}
 		return stored, ok, nil
 	}
 
