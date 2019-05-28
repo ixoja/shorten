@@ -2,16 +2,16 @@ package service
 
 import (
 	"context"
-	"github.com/ixoja/shorten/internal/model"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"testing"
 
 	"github.com/icrowley/fake"
 	"github.com/ixoja/shorten/internal/grpcapi"
+	"github.com/ixoja/shorten/internal/model"
 	"github.com/ixoja/shorten/internal/service/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func TestService_Shorten(t *testing.T) {

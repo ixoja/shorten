@@ -2,18 +2,17 @@ package main
 
 import (
 	"database/sql"
-	"github.com/ixoja/shorten/internal/controller"
-	"github.com/ixoja/shorten/internal/storage"
 	"log"
 	"net"
 	"net/http"
 
+	"github.com/ixoja/shorten/internal/controller"
 	"github.com/ixoja/shorten/internal/grpcapi"
 	"github.com/ixoja/shorten/internal/service"
+	"github.com/ixoja/shorten/internal/storage"
+	"github.com/ixoja/shorten/internal/webserver"
 	_ "github.com/mattn/go-sqlite3"
 	"google.golang.org/grpc"
-
-	"github.com/ixoja/shorten/internal/webserver"
 )
 
 func main() {
@@ -35,7 +34,7 @@ func main() {
 		}()
 
 		c := grpcapi.NewShortenServiceClient(conn)
-		ws := webserver.New(c, config.webURL + ":" + config.port)
+		ws := webserver.New(c, config.webURL+":"+config.port)
 		http.Handle("/", http.FileServer(http.Dir(config.htmlPath)))
 		http.HandleFunc("/shorten", ws.Shorten)
 		http.HandleFunc("/to", ws.Redirect)

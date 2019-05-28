@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/ixoja/shorten/internal/grpcapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log"
-	"net/http"
 )
 
 type Server struct {
@@ -18,7 +19,7 @@ type Server struct {
 
 //go:generate mockery -case=underscore -dir=../grpcapi -name ShortenServiceClient
 const (
-	url = "url"
+	urlConst = "url"
 )
 
 func New(client grpcapi.ShortenServiceClient, myURL string) *Server {
@@ -26,7 +27,7 @@ func New(client grpcapi.ShortenServiceClient, myURL string) *Server {
 }
 
 func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {
-	longURL, err := extractValue(r, url)
+	longURL, err := extractValue(r, urlConst)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -36,7 +37,7 @@ func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {
 	switch status.Code(err) {
 	case codes.OK:
 		w.WriteHeader(http.StatusOK)
-		if _, err := fmt.Fprintf(w, s.MyURL + "/to?" + resp.Hash); err != nil {
+		if _, err := fmt.Fprintf(w, shortURL(s.MyURL, resp.Hash)); err != nil {
 			log.Println(err.Error())
 		}
 	case codes.InvalidArgument:
@@ -46,6 +47,10 @@ func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func shortURL(myURL, hash string) string {
+	return myURL + "/to?" + hash
 }
 
 var errNoURL = errors.New("no url in request")
@@ -77,6 +82,8 @@ func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, resp.LongUrl, http.StatusFound)
 	case codes.InvalidArgument:
 		http.Error(w, err.Error(), http.StatusBadRequest)
+	case codes.NotFound:
+		http.Error(w, err.Error(), http.StatusNotFound)
 	case codes.Internal:
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	default:

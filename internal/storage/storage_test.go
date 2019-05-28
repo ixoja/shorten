@@ -2,13 +2,13 @@ package storage
 
 import (
 	"database/sql"
-	"github.com/icrowley/fake"
-	"github.com/ixoja/shorten/internal/model"
-	"github.com/stretchr/testify/require"
 	"testing"
 
+	"github.com/icrowley/fake"
+	"github.com/ixoja/shorten/internal/model"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func dbConnection(t *testing.T) *sql.DB {

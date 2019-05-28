@@ -3,7 +3,7 @@
 package mocks
 
 import context "context"
-import grpc "github.com/ixoja/shorten/vendor/google.golang.org/grpc"
+import grpc "google.golang.org/grpc"
 import grpcapi "github.com/ixoja/shorten/internal/grpcapi"
 import mock "github.com/stretchr/testify/mock"
 

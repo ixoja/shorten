@@ -17,14 +17,14 @@ type SQLite struct {
 }
 
 func New(db sql.DB) *SQLite {
-	return &SQLite{Database:db}
+	return &SQLite{Database: db}
 }
 
 const (
 	createTable = "CREATE TABLE IF NOT EXISTS shorten (id INTEGER PRIMARY KEY AUTOINCREMENT, longURL TEXT, lastAccess INTEGER)"
-	insert = "INSERT INTO shorten (longURL, lastAccess) VALUES (?,?)"
-	get = "SELECT id, longURL, lastAccess FROM shorten WHERE id=?"
-	getByURL = "SELECT id, longURL, lastAccess FROM shorten WHERE longURL=?"
+	insert      = "INSERT INTO shorten (longURL, lastAccess) VALUES (?,?)"
+	get         = "SELECT id, longURL, lastAccess FROM shorten WHERE id=?"
+	getByURL    = "SELECT id, longURL, lastAccess FROM shorten WHERE longURL=?"
 )
 
 func (s *SQLite) InitDB() error {
@@ -37,7 +37,7 @@ func (s *SQLite) InitDB() error {
 	if err != nil {
 		return errors.Wrap(err, "failed to init table")
 	}
-		return nil
+	return nil
 }
 
 func (s *SQLite) Save(stored *model.StoredURL) (*model.StoredURL, error) {
@@ -93,7 +93,7 @@ func (s *SQLite) Get(id string) (*model.StoredURL, bool, error) {
 		if err != nil {
 			log.Println("failed to close prepared statement", err.Error())
 		}
-		stored.ID =  base64.StdEncoding.EncodeToString([]byte(id))
+		stored.ID = base64.StdEncoding.EncodeToString([]byte(id))
 		stored.LastAccess = time.Unix(timestamp, 0)
 		return stored, true, nil
 	}
@@ -125,7 +125,7 @@ func (s *SQLite) GetByURL(longURL string) (*model.StoredURL, bool, error) {
 		if err != nil {
 			log.Println("failed to close prepared statement", err.Error())
 		}
-		stored.ID =  base64.StdEncoding.EncodeToString([]byte(id))
+		stored.ID = base64.StdEncoding.EncodeToString([]byte(id))
 		stored.LastAccess = time.Unix(timestamp, 0)
 		return stored, true, nil
 	}
