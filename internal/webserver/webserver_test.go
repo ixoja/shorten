@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"github.com/icrowley/fake"
 	"io/ioutil"
@@ -31,8 +30,7 @@ func TestServer_Shorten(t *testing.T) {
 		myURL := fake.DomainName()
 		client := mocks.ShortenServiceClient{}
 		ws := &Server{MyURL: myURL, Client: &client}
-		client.On("Post", myURL, url, "http://google.com").
-			Return(nil, errors.New("some err"))
+
 		req := httptest.NewRequest("POST",
 			"http://example.com/foo",
 			strings.NewReader(`url=http%3A%2F%2Fgoogle.com`))

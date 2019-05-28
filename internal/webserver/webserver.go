@@ -7,6 +7,7 @@ import (
 	"github.com/ixoja/shorten/internal/grpcapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"log"
 	"net/http"
 )
 
@@ -34,12 +35,15 @@ func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {
 	resp, err := s.Client.Shorten(context.Background(), &grpcapi.ShortenRequest{LongUrl: longURL})
 	switch status.Code(err) {
 	case codes.OK:
-		shortURL := fmt.Sprintf("%s/to?%s", s.MyURL, resp.Hash)
 		w.WriteHeader(http.StatusOK)
-		fmt.Print(w, shortURL)
+		if _, err := fmt.Fprintf(w, s.MyURL + "/to?" + resp.Hash); err != nil {
+			log.Println(err.Error())
+		}
 	case codes.InvalidArgument:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	case codes.Internal:
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	default:
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -74,6 +78,8 @@ func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
 	case codes.InvalidArgument:
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	case codes.Internal:
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	default:
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

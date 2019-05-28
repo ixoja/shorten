@@ -35,14 +35,14 @@ func main() {
 		}()
 
 		c := grpcapi.NewShortenServiceClient(conn)
-		ws := webserver.New(c, config.webURL)
+		ws := webserver.New(c, config.webURL + ":" + config.port)
 		http.Handle("/", http.FileServer(http.Dir(config.htmlPath)))
 		http.HandleFunc("/shorten", ws.Shorten)
 		http.HandleFunc("/to", ws.Redirect)
 		log.Println("Registering web server on port:", config.port)
 		log.Fatal(http.ListenAndServe(":"+config.port, nil))
 	case grpcServer:
-		db, err := sql.Open("sqlite3", "./foo.db")
+		db, err := sql.Open("sqlite3", "./shorten.db")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -52,13 +52,19 @@ func main() {
 			}
 		}()
 
-		s := service.New(controller.New(&storage.Cache{}, storage.New(*db)))
+		st := storage.New(*db)
+		if err := st.InitDB(); err != nil {
+			log.Fatalf("failed to init db: %v", err)
+		}
+
+		s := service.New(controller.New(storage.NewCache(), st))
 		lis, err := net.Listen("tcp", config.port)
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
 		server := grpc.NewServer()
 		grpcapi.RegisterShortenServiceServer(server, s)
+		log.Println("strating grpc service")
 		if err := server.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
 		}

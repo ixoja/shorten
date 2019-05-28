@@ -6,9 +6,9 @@ import (
 )
 
 type StoredURL struct {
-	ID        string
-	LongURL   string
-	CreatedAt time.Time
+	ID         string
+	LongURL    string
+	LastAccess time.Time
 }
 
 var (

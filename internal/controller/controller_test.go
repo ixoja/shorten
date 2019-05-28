@@ -74,7 +74,7 @@ func TestController_Shorten(t *testing.T) {
 			cache.On("GetByURL", toFullURL(longURL)).Return(nil, false, nil)
 			storage.On("GetByURL", toFullURL(longURL)).Return(nil, false, nil)
 			hash := fake.CharactersN(5)
-			stored := &model.StoredURL{LongURL: fullURL, ID: hash, CreatedAt: time.Now()}
+			stored := &model.StoredURL{LongURL: fullURL, ID: hash, LastAccess: time.Now()}
 			storage.On("Save", &model.StoredURL{LongURL: fullURL}).Return(stored, nil)
 			retErr := errors.New("cache err")
 			cache.On("Save", stored).Return(nil, retErr)
@@ -94,7 +94,7 @@ func TestController_Shorten(t *testing.T) {
 			cache.On("GetByURL", toFullURL(longURL)).Return(nil, false, nil)
 			storage.On("GetByURL", toFullURL(longURL)).Return(nil, false, nil)
 			hash := fake.CharactersN(5)
-			stored := &model.StoredURL{LongURL: fullURL, ID: hash, CreatedAt: time.Now()}
+			stored := &model.StoredURL{LongURL: fullURL, ID: hash, LastAccess: time.Now()}
 			storage.On("Save", &model.StoredURL{LongURL: fullURL}).Return(stored, nil)
 			cacheErr := errors.New("cache err")
 			cache.On("Save", stored).Return(nil, cacheErr)
@@ -146,7 +146,7 @@ func TestController_Shorten(t *testing.T) {
 			hash := fake.CharactersN(5)
 			cache.On("GetByURL", fullURL).Return(nil, false, nil)
 			storage.On("GetByURL", fullURL).Return(nil, false, nil)
-			stored := &model.StoredURL{LongURL: fullURL, ID: hash, CreatedAt: time.Now()}
+			stored := &model.StoredURL{LongURL: fullURL, ID: hash, LastAccess: time.Now()}
 			storage.On("Save", &model.StoredURL{LongURL: fullURL}).Return(stored, nil)
 			cache.On("Save", stored).Return(stored, nil)
 
