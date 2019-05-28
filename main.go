@@ -51,7 +51,7 @@ func main() {
 			}
 		}()
 
-		st := storage.New(*db)
+		st := storage.New(db)
 		if err := st.InitDB(); err != nil {
 			log.Fatalf("failed to init db: %v", err)
 		}

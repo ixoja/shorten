@@ -35,7 +35,8 @@ func (s *Service) Shorten(ctx context.Context, r *grpcapi.ShortenRequest) (*grpc
 	}
 }
 
-func (s *Service) RedirectURL(ctx context.Context, r *grpcapi.RedirectURLRequest) (*grpcapi.RedirectURLResponse, error) {
+func (s *Service) RedirectURL(ctx context.Context,
+	r *grpcapi.RedirectURLRequest) (*grpcapi.RedirectURLResponse, error) {
 	switch url, err := s.Controller.RedirectURL(r.Hash); errors.Cause(err) {
 	case nil:
 		return &grpcapi.RedirectURLResponse{LongUrl: url}, nil

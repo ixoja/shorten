@@ -22,7 +22,7 @@ func dbConnection(t *testing.T) *sql.DB {
 func TestSQLite_InitDB(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		db := dbConnection(t)
-		s := SQLite{*db}
+		s := SQLite{db}
 		err := s.InitDB()
 		assert.NoError(t, err)
 		db.Close()
@@ -32,7 +32,7 @@ func TestSQLite_InitDB(t *testing.T) {
 func TestSQLite_Save(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		db := dbConnection(t)
-		s := SQLite{*db}
+		s := SQLite{db}
 		err := s.InitDB()
 		require.NoError(t, err)
 		longURL := fake.DomainName()
@@ -53,7 +53,7 @@ func TestSQLite_Save(t *testing.T) {
 func TestSQLite_GetByURL(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		db := dbConnection(t)
-		s := SQLite{*db}
+		s := SQLite{db}
 		err := s.InitDB()
 		require.NoError(t, err)
 		longURL := fake.DomainName()

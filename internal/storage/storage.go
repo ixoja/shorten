@@ -9,22 +9,22 @@ import (
 	"time"
 
 	"github.com/ixoja/shorten/internal/model"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type SQLite struct {
-	Database sql.DB
+	Database *sql.DB
 }
 
-func New(db sql.DB) *SQLite {
+func New(db *sql.DB) *SQLite {
 	return &SQLite{Database: db}
 }
 
 const (
-	createTable = "CREATE TABLE IF NOT EXISTS shorten (id INTEGER PRIMARY KEY AUTOINCREMENT, longURL TEXT, lastAccess INTEGER)"
-	insert      = "INSERT INTO shorten (longURL, lastAccess) VALUES (?,?)"
-	get         = "SELECT id, longURL, lastAccess FROM shorten WHERE id=?"
-	getByURL    = "SELECT id, longURL, lastAccess FROM shorten WHERE longURL=?"
+	createTable = "CREATE TABLE IF NOT EXISTS shorten " +
+		"(id INTEGER PRIMARY KEY AUTOINCREMENT, longURL TEXT, lastAccess INTEGER)"
+	insert   = "INSERT INTO shorten (longURL, lastAccess) VALUES (?,?)"
+	get      = "SELECT id, longURL, lastAccess FROM shorten WHERE id=?"
+	getByURL = "SELECT id, longURL, lastAccess FROM shorten WHERE longURL=?"
 )
 
 func (s *SQLite) InitDB() error {

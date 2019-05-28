@@ -14,7 +14,7 @@ type Cache struct {
 }
 
 func NewCache() *Cache {
-	m := make(map[string]*model.StoredURL, 0)
+	m := make(map[string]*model.StoredURL)
 	return &Cache{urls: struct {
 		sync.RWMutex
 		m map[string]*model.StoredURL
