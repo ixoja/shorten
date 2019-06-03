@@ -1,5 +1,5 @@
 # shorten
-This is a simple URL shortener. It is splint into frontend and backend parts which communicate by gRPC.
+This is a simple URL shortener. It is split into frontend and backend parts which communicate by gRPC.
 Frontend serves a static HTML page and provides a simple HTTP API. 
 
 # Build and run
