@@ -16,13 +16,13 @@ import (
 )
 
 func main() {
-	const webServer = "webserver"
-	const grpcServer = "grpcserver"
+	const frontend = "frontend"
+	const backend = "backend"
 	config := Config{}
 	config.WithFlags()
 
 	switch config.mode {
-	case webServer:
+	case frontend:
 		conn, err := grpc.Dial(config.apiURL, grpc.WithInsecure())
 		if err != nil {
 			log.Fatalf("did not connect: %v", err)
@@ -40,7 +40,7 @@ func main() {
 		http.HandleFunc("/to", ws.Redirect)
 		log.Println("Registering web server on port:", config.port)
 		log.Fatal(http.ListenAndServe(":"+config.port, nil))
-	case grpcServer:
+	case backend:
 		db, err := sql.Open("sqlite3", "./shorten.db")
 		if err != nil {
 			log.Fatal(err)

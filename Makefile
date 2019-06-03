@@ -12,7 +12,7 @@ GOTEST    = $(GOCMD) test -race -v -count=1
 GOLINT    = golangci-lint
 
 # Binary output name
-BINARY = shorten.exe
+BINARY = shorten
 
 #
 VENDOR_DIR           = ./vendor
@@ -84,13 +84,13 @@ build:
 	@echo -e $(GREEN_COLOR)[build]$(DEFAULT_COLOR)
 	@$(GOBUILD) -v -o $(BIN_PATH)/$(BINARY)
 
-run webserver: build
+run_frontend: build
 	@echo -e $(GREEN_COLOR)[run web_server]$(DEFAULT_COLOR)
-	$(BIN_PATH)\$(BINARY) -mode "webserver" -html $(MAKEFILE_PATH)\internal\html -port 8080 -api_url "localhost:9000"
+	$(BIN_PATH)\$(BINARY) --mode frontend --html $(MAKEFILE_PATH)\internal\html --port 9000 --web_url localhost --api_url localhost:9001
 
-run apiserver: build
+run_backend: build
 	@echo -e $(GREEN_COLOR)[run api_server]$(DEFAULT_COLOR)
-	$(BIN_PATH)\$(BINARY) -mode "apiserver" -api_address ":9000"
+	$(BIN_PATH)\$(BINARY) --mode backend --port :9001
 
 docker: build
 	@echo -e $(GREEN_COLOR)[DOCKER]$(DEFAULT_COLOR)
