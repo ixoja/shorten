@@ -14,5 +14,5 @@ NOTICE: order matters. Run backend first, then run frontend.
 
 # TODOs
 - add transactions
-- dokerize
+- dockerize
 - make URLs shorter
